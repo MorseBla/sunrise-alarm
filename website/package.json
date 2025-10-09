@@ -13,4 +13,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0"
   }
+  "scripts": {
+    "build-and-start": "npm run build && npm run start"
+  }
 }
