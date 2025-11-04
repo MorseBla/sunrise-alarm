@@ -4,7 +4,7 @@ from .base import Layer
 
 
 class RainbowAnimation(Layer):
-    def __init__(self, width, height, speed=0.002):
+    def __init__(self, width, height, speed=0.0016):
         self.width = width
         self.height = height
         self.hue = 0
