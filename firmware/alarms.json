@@ -1,0 +1,16 @@
+{
+	"alarms": [
+		{
+			"time": "18:32",
+			"label": "Wake Up"
+		},
+		{
+			"time": "18:33",
+			"label": "Wake Up3"
+		},
+		{
+			"time": "18:27",
+			"label": "Wake Up2"
+		}
+	]
+}

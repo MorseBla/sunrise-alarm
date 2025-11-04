@@ -17,10 +17,10 @@ class RotatingBlockGenerator(Layer):
         self.width = 32
         self.height = 32
         self.cent_x = self.width / 2
-        self.cent_y = self.height / 2
+        self.cent_y = self.height / 2  
         self.deg_to_rad = math.pi / 180
 
-        display_square = min(self.width, self.height) * 0.5
+        display_square = min(self.width, self.height) * 0.7
         self.min_display = self.cent_x - display_square / 2
         self.max_display = self.cent_x + display_square / 2
 
@@ -45,9 +45,10 @@ class RotatingBlockGenerator(Layer):
                     # simple color function based on source coords
                     valx = int(255 * (x_src - self.min_display) / (self.max_display - self.min_display))
                     valy = int(255 * (y_src - self.min_display) / (self.max_display - self.min_display))
-                    canvas.SetPixel(x_out, y_out, valx, 255 - valy, valy)
+                    canvas.SetPixel(x_out, y_out + 0, valx, 255 - valy, valy)
                 else:
-                    canvas.SetPixel(x_out, y_out, 0, 0, 0)
+                    #canvas.SetPixel(x_out, y_out, 0, 0, 0)
+                    pass
 
 
 # Main function
