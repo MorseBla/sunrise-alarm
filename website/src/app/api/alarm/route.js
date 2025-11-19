@@ -16,7 +16,11 @@ export async function GET() {
 // POST /api/alarm → save new alarm
 export async function POST(req) {
   const body = await req.json();
-  await fs.writeFile(SETTINGS_FILE, JSON.stringify(body, null, 2));
+  const payload = {
+      alarms: [ body ]
+  };
+
+    await fs.writeFile(SETTINGS_FILE, JSON.stringify(payload, null, 2));
   return Response.json({ message: "Alarm saved!" });
 }
 

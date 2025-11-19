@@ -27,7 +27,7 @@ export default function SettingsPage() {
 
   return (
     <main className="container mt-5">
-      <h1>⏰ Alarm Settings</h1>
+      <h1>Alarm Settings</h1>
       <form onSubmit={handleSave} className="mt-3">
         <label className="form-label">Alarm Time:</label>
         <input

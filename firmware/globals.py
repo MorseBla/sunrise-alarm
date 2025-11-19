@@ -13,7 +13,7 @@ def updateRot(newValue):
 def getTime():
     return time.localtime()
 
-def load_alarms(filename="~/Desktop/sunrise-alarm/firmware/alarms.json"):
+def load_alarms(filename="~/Desktop/sunrise-alarm/website/alarms.json"):
     with open(filename, "r") as f:
         data = json.load(f)
     return [a["time"] for a in data.get("alarms", [])]
