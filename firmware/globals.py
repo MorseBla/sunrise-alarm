@@ -1,5 +1,6 @@
 import time
 import json
+import os
 
 rot = 0
 
@@ -13,15 +14,25 @@ def updateRot(newValue):
 def getTime():
     return time.localtime()
 
-def load_alarms(filename="~/Desktop/sunrise-alarm/website/alarms.json"):
-    with open(filename, "r") as f:
-        data = json.load(f)
-    return [a["time"] for a in data.get("alarms", [])]
+def load_alarms(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/alarms.json"):
+    # Expand ~ manually (Python won't expand it inside a string)
+    filename = os.path.expanduser(filename)
 
-def checkAlarm(filename="firmware/alarms.json"):
+    with open(filename, "r") as f:
+        data = json.load(f)     # <-- data is a LIST
+
+    # Return only enabled alarms
+    return [a["time"] for a in data if a.get("enabled", True)]
+
+def checkAlarm(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/alarms.json"):
     print("checking alarm")
+
     now = time.localtime()
     current_time = f"{now.tm_hour:02d}:{now.tm_min:02d}"
+
     alarms = load_alarms(filename)
+
     if current_time in alarms:
         print("ALARM")
+
+
