@@ -38,7 +38,7 @@ def checkAlarm(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/ala
 
 def load_settings():
     """Load the settings JSON safely and return a dict."""
-    time.sleep(0.01)
+    time.sleep(0.1)
     with open(SETTINGS_FILE, "r") as f:
         data = json.load(f)
     return data

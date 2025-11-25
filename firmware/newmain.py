@@ -4,6 +4,7 @@ from firmware.display.layers.clock import ClockOverlay
 from firmware.display.compositor import Compositor
 from firmware.display.layers.rotAnimation import RotatingBlockGenerator 
 from firmware.display.layers.png_animation import PNGAnimationLayer
+from firmware.display.layers.white_screen import WhiteScreen 
     
 def main():
     matrix = MatrixController(rows=32, cols=32, chain=1)
