@@ -6,7 +6,7 @@ class Compositor:
         self.matrix = matrix
         self.layers = layers
         self.last_time = time.time()
-
+        self.last_brightness = globals.get_brightness() 
     def run(self, fps=30):
         frame_duration = 1.0 / fps
         canvas = self.matrix.canvas
@@ -22,7 +22,10 @@ class Compositor:
             # Update each layer in order
             for layer in self.layers:
                 layer.update(canvas, dt)
-            self.matrix.brightness = get_brightness()
+            current_brightness = globals.get_brightness()
+            if current_brightness != self.last_brightness:
+                self.matrix.matrix.brightness = current_brightness
+                self.last_brightness = current_brightness
             # Swap display buffer
             canvas = self.matrix.matrix.SwapOnVSync(canvas)
 

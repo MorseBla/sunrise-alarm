@@ -1,7 +1,7 @@
 import time
 import json
 import os
-SETTINGS_FILE = "Users/blakemorse/Desktop/sunrise-alarm/website/data/alarms.json"
+SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
 rot = 0
 
 def getRot():
@@ -14,7 +14,8 @@ def updateRot(newValue):
 def getTime():
     return time.localtime()
 
-def load_alarms(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/alarms.json"):
+def load_alarms(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/alarms.json"):
+    time.sleep(0.01)
     # Expand ~ manually (Python won't expand it inside a string)
     filename = os.path.expanduser(filename)
 
@@ -24,7 +25,7 @@ def load_alarms(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/a
     # Return only enabled alarms
     return [a["time"] for a in data if a.get("enabled", True)]
 
-def checkAlarm(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/alarms.json"):
+def checkAlarm(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/alarms.json"):
     print("checking alarm")
 
     now = time.localtime()
@@ -37,8 +38,10 @@ def checkAlarm(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/al
 
 def load_settings():
     """Load the settings JSON safely and return a dict."""
+    time.sleep(0.01)
     with open(SETTINGS_FILE, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+    return data
 
 def get_volume():
     """Return the volume value from the JSON (default 100 if missing)."""

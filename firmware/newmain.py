@@ -4,14 +4,13 @@ from firmware.display.layers.clock import ClockOverlay
 from firmware.display.compositor import Compositor
 from firmware.display.layers.rotAnimation import RotatingBlockGenerator 
 from firmware.display.layers.png_animation import PNGAnimationLayer
-
     
 def main():
     matrix = MatrixController(rows=32, cols=32, chain=1)
     layers = [
-        #RainbowAnimation(matrix.options.cols, matrix.options.rows),
-        #RotatingBlockGenerator(),
-        PNGAnimationLayer(folder="display/animations/sunrise1", fps=5, width=32, height=32),
+        RainbowAnimation(matrix.options.cols, matrix.options.rows),
+        RotatingBlockGenerator(),
+        #PNGAnimationLayer(folder="firmware/display/animations/sunrise1", fps=1, width=32, height=32),
         ClockOverlay()
     ]
 
