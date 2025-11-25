@@ -3,112 +3,89 @@
 import { useState, useEffect } from "react";
 
 export default function SettingsPage() {
-  const [alarms, setAlarms] = useState([]);
-  const [newTime, setNewTime] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    volume: 50,
+    brightness: 50
+  });
 
-  // Load alarms on mount
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Load settings on page load
   useEffect(() => {
     async function load() {
-      const res = await fetch("/api/alarms");
+      const res = await fetch("/api/settings");
       const data = await res.json();
-      setAlarms(data);
+      setSettings(data);
       setLoading(false);
     }
     load();
   }, []);
 
-  // Add an alarm
-  async function addAlarm() {
-    if (!newTime) return;
+  // Save settings
+  async function saveSettings() {
+    setSaving(true);
 
-    const res = await fetch("/api/alarms", {
+    const res = await fetch("/api/settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ time: newTime })
+      body: JSON.stringify(settings),
     });
 
-    const alarm = await res.json();
-    setAlarms([...alarms, alarm]);
-    setNewTime("");
-  }
+    const updated = await res.json();
+    setSettings(updated);
 
-  // Toggle enable/disable
-  async function toggleAlarm(alarm) {
-    await fetch("/api/alarms", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: alarm.id,
-        enabled: !alarm.enabled
-      })
-    });
-
-    setAlarms(
-      alarms.map((a) =>
-        a.id === alarm.id ? { ...a, enabled: !a.enabled } : a
-      )
-    );
-  }
-
-  // Delete an alarm
-  async function deleteAlarm(alarm) {
-    await fetch("/api/alarms", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: alarm.id })
-    });
-
-    setAlarms(alarms.filter((a) => a.id !== alarm.id));
+    setSaving(false);
+    alert("Settings saved!");
   }
 
   if (loading) return <p className="container mt-5">Loading...</p>;
 
   return (
     <main className="container mt-5" style={{ maxWidth: 600 }}>
-      <h1 className="mb-4">⏰ Alarm Settings</h1>
+        <h1 className="mb-4">Settings</h1>
 
-      {/* Add new alarm */}
-      <div className="input-group mb-4">
+      {/* Volume */}
+      <div className="mb-4">
+        <label className="form-label">
+          Volume: <strong>{settings.volume}</strong>
+        </label>
         <input
-          type="time"
-          className="form-control"
-          value={newTime}
-          onChange={(e) => setNewTime(e.target.value)}
+          type="range"
+          className="form-range"
+          min="0"
+          max="100"
+          value={settings.volume}
+          onChange={(e) =>
+            setSettings({ ...settings, volume: parseInt(e.target.value) })
+          }
         />
-        <button className="btn btn-success" onClick={addAlarm}>
-          Add
-        </button>
       </div>
 
-      {/* List alarms */}
-      <ul className="list-group">
-        {alarms.map((alarm) => (
-          <li
-            key={alarm.id}
-            className="list-group-item d-flex justify-content-between align-items-center"
-          >
-            <span>{alarm.time}</span>
+      {/* Brightness */}
+      <div className="mb-4">
+        <label className="form-label">
+          Brightness: <strong>{settings.brightness}</strong>
+        </label>
+        <input
+          type="range"
+          className="form-range"
+          min="0"
+          max="100"
+          value={settings.brightness}
+          onChange={(e) =>
+            setSettings({ ...settings, brightness: parseInt(e.target.value) })
+          }
+        />
+      </div>
 
-            {/* Toggle switch */}
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={alarm.enabled}
-                onChange={() => toggleAlarm(alarm)}
-              />
-              <span className="slider"></span>
-            </label>
-
-            <button
-              className="btn btn-sm btn-danger"
-              onClick={() => deleteAlarm(alarm)}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      <button
+        className="btn btn-primary"
+        onClick={saveSettings}
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Save Settings"}
+      </button>
     </main>
   );
 }

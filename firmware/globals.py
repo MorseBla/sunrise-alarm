@@ -1,7 +1,7 @@
 import time
 import json
 import os
-
+SETTINGS_FILE = "Users/blakemorse/Desktop/sunrise-alarm/website/data/alarms.json"
 rot = 0
 
 def getRot():
@@ -35,4 +35,17 @@ def checkAlarm(filename="/Users/blakemorse/Desktop/sunrise-alarm/website/data/al
     if current_time in alarms:
         print("ALARM")
 
+def load_settings():
+    """Load the settings JSON safely and return a dict."""
+    with open(SETTINGS_FILE, "r") as f:
+        return json.load(f)
 
+def get_volume():
+    """Return the volume value from the JSON (default 100 if missing)."""
+    data = load_settings()
+    return data.get("volume", 100)
+
+def get_brightness():
+    """Return the brightness value from the JSON (default 100 if missing)."""
+    data = load_settings()
+    return data.get("brightness", 100)

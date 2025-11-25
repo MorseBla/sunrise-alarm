@@ -1,4 +1,5 @@
 import time
+from firmware import globals
 
 class Compositor:
     def __init__(self, matrix, layers):
@@ -14,14 +15,14 @@ class Compositor:
             start = time.time()
             dt = start - self.last_time
             self.last_time = start
-
+        
             # Clear before redrawing
             canvas.Clear()
 
             # Update each layer in order
             for layer in self.layers:
                 layer.update(canvas, dt)
-
+            self.matrix.brightness = get_brightness()
             # Swap display buffer
             canvas = self.matrix.matrix.SwapOnVSync(canvas)
 
