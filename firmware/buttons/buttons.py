@@ -15,10 +15,10 @@ def handle_btn2():
 def handle_btn3():
     print("display mode")
 
-btn1.when_pressed = handle_btn1
-btn2.when_pressed = handle_btnk
-btn3.when_pressed = handle_btn3
 
-def start_button_listener():
+def init_buttons():
     print("Buttons active.")
+    btn1.when_pressed = handle_btn1
+    btn2.when_pressed = handle_btnk
+    btn3.when_pressed = handle_btn3
 
