@@ -1,5 +1,5 @@
 from firmware import globals 
-    from firmware.buttons.buttons import init_buttons
+from firmware.buttons.buttons import init_buttons
     
 def main():
     init_buttons() 
