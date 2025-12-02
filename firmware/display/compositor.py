@@ -10,7 +10,6 @@ class Compositor:
     def run(self, fps=30):
         frame_duration = 1.0 / fps
         canvas = self.matrix.canvas
-
         while True:
             start = time.time()
             dt = start - self.last_time

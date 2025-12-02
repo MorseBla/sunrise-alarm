@@ -1,6 +1,15 @@
 import time
 import json
 import os
+from firmware.display.matrix import MatrixController
+from firmware.display.layers.animation import RainbowAnimation
+from firmware.display.layers.clock import ClockOverlay
+from firmware.display.layers.clock2 import ClockOverlay2
+from firmware.display.compositor import Compositor
+from firmware.display.layers.rotAnimation import RotatingBlockGenerator 
+from firmware.display.layers.png_animation import PNGAnimationLayer
+from firmware.display.layers.white_screen import WhiteScreen 
+
 SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
 rot = 0
 
@@ -35,6 +44,7 @@ def checkAlarm(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/ala
 
     if current_time in alarms:
         print("ALARM")
+        update_display(1)
 
 def load_settings():
     """Load the settings JSON safely and return a dict."""
@@ -52,3 +62,28 @@ def get_brightness():
     """Return the brightness value from the JSON (default 100 if missing)."""
     data = load_settings()
     return data.get("brightness", 100)
+
+
+
+
+matrix = MatrixController(rows=32, cols=32, chain=1)
+layer1 = [
+    RainbowAnimation(matrix.options.cols, matrix.options.rows),
+    RotatingBlockGenerator(),
+    ClockOverlay()
+]
+layer2 = [
+    PNGAnimationLayer(folder="firmware/display/animations/sunrise1", width=32, height=32),
+    ClockOverlay2()
+]
+layers= [layer1, layer2]
+def start(idx):
+    compositor = Compositor(matrix, layers[idx])
+    compositor.run(fps=30)
+
+def update_display(idx):
+    compositor = Compositor(matrix, layers[idx])
+    compositor.run(fps=30)
+
+
+    

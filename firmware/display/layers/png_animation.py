@@ -6,15 +6,14 @@ from firmware.display.layers.base import Layer  # adjust path if needed
 
 
 class PNGAnimationLayer(Layer):
-    def __init__(self, folder, fps=10, width=32, height=32):
+    def __init__(self, folder, width=32, height=32):
         super().__init__()
         self.folder = folder
-        self.fps = fps
-        self.frame_delay = 1.0 / fps
+        self.frame_delay = 10.0
         self.width = width
         self.height = height
         self.frames = []
-        self.last_time = 0
+        self.last_time = time.time()
         self.current_frame = 0
 
         # Load and preprocess all frames
@@ -41,7 +40,7 @@ class PNGAnimationLayer(Layer):
             return
 
         now = time.time()
-        if now - self.last_time >= self.frame_delay:
+        if now - self.last_time >= self.frame_delay and self.current_frame < len(self.frames) - 1:
             self.last_time = now
             self.current_frame = (self.current_frame + 1) % len(self.frames)
 
