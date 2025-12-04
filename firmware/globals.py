@@ -9,9 +9,11 @@ from firmware.display.compositor import Compositor
 from firmware.display.layers.rotAnimation import RotatingBlockGenerator 
 from firmware.display.layers.png_animation import PNGAnimationLayer
 from firmware.display.layers.white_screen import WhiteScreen 
+from firmware.display.layers.display_image import imageLayer 
 
 SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
 rot = 0
+state = 0
 
 def getRot():
     global rot
@@ -76,6 +78,9 @@ layer2 = [
     PNGAnimationLayer(folder="firmware/display/animations/sunrise1", width=32, height=32),
     ClockOverlay2()
 ]
+layer3 = [
+        imageLayer(image_file="firmware/display/animations/image1.png")
+        ]
 layers= [layer1, layer2]
 def start(idx):
     compositor = Compositor(matrix, layers[idx])
@@ -86,4 +91,5 @@ def update_display(idx):
     compositor.run(fps=30)
 
 
-    
+def change_state(int new_state): #state 0 = default state; state 1 = alarm state
+
