@@ -81,7 +81,7 @@ layer2 = [
 layer3 = [
         imageLayer(image_file="firmware/display/animations/image1.png")
         ]
-layers= [layer1, layer2]
+layers= [layer1, layer2, layer3]
 def start(idx):
     compositor = Compositor(matrix, layers[idx])
     compositor.run(fps=30)
@@ -91,5 +91,5 @@ def update_display(idx):
     compositor.run(fps=30)
 
 
-def change_state(int new_state): #state 0 = default state; state 1 = alarm state
-
+def change_state(new_state): #state 0 = default state; state 1 = alarm state
+    pass

@@ -12,6 +12,6 @@ class imageLayer(Layer):
         self.height = height
         self.image = img.resize((width, height))
 
-    def update(self, canvas):
+    def update(self, canvas, dt):
         canvas.SetImage(self.image)
 
