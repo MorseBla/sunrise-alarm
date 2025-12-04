@@ -3,13 +3,14 @@ import time
 from PIL import Image
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from firmware.display.layers.base import Layer  # adjust path if needed
+from firmware import globals
 
 
 class PNGAnimationLayer(Layer):
     def __init__(self, folder, width=32, height=32):
         super().__init__()
         self.folder = folder
-        self.frame_delay = 10.0
+        self.frame_delay = 1.0
         self.width = width
         self.height = height
         self.frames = []
@@ -43,7 +44,12 @@ class PNGAnimationLayer(Layer):
         if now - self.last_time >= self.frame_delay and self.current_frame < len(self.frames) - 1:
             self.last_time = now
             self.current_frame = (self.current_frame + 1) % len(self.frames)
-
+            if (self.current_frame == 5):
+                globals.update_leds(10)
+            elif (self.current_frame == 6):
+                globals.update_leds(30)
+            elif (self.current_frame == 7):
+                globals.update_leds(60)
         frame = self.frames[self.current_frame]
         canvas.SetImage(frame)
 

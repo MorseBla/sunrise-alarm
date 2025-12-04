@@ -10,11 +10,13 @@ from firmware.display.layers.rotAnimation import RotatingBlockGenerator
 from firmware.display.layers.png_animation import PNGAnimationLayer
 from firmware.display.layers.white_screen import WhiteScreen 
 from firmware.display.layers.display_image import imageLayer 
+from firmware.display.layers.black_screen import BlackScreen 
+from firmware import led 
 
 SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
 rot = 0
 state = 0
-
+layer = 0
 def getRot():
     global rot
     return rot
@@ -69,27 +71,70 @@ def get_brightness():
 
 
 matrix = MatrixController(rows=32, cols=32, chain=1)
+layer0 = [
+        ClockOverlay()
+        ]
 layer1 = [
     RainbowAnimation(matrix.options.cols, matrix.options.rows),
     RotatingBlockGenerator(),
     ClockOverlay()
 ]
 layer2 = [
+        imageLayer(image_file="firmware/display/animations/image1.png")
+        ]
+layer3 = [
+        BlackScreen()
+        ]
+layer4 = [
     PNGAnimationLayer(folder="firmware/display/animations/sunrise1", width=32, height=32),
     ClockOverlay2()
 ]
-layer3 = [
-        imageLayer(image_file="firmware/display/animations/image1.png")
-        ]
-layers= [layer1, layer2, layer3]
+layers= [layer0, layer1, layer2, layer3, layer4]
+compositor = Compositor(matrix, layers[0])
+red, green, blue, white = led.init()
 def start(idx):
-    compositor = Compositor(matrix, layers[idx])
+    global compositor 
+    global state
+    #state = 1
+    compositor.update_layer(layers[idx])
     compositor.run(fps=30)
 
+def update_leds(percent):
+    global white
+    white.ChangeDutyCycle(percent)
+
+def led_off():
+    global red, green, blue, white
+    red.ChangeDutyCycle(0)
+    green.ChangeDutyCycle(0)
+    blue.ChangeDutyCycle(0)
+    white.ChangeDutyCycle(0)
+
+     
 def update_display(idx):
-    compositor = Compositor(matrix, layers[idx])
-    compositor.run(fps=30)
-
+    global compositor 
+    compositor.update_layer(layers[idx])
 
 def change_state(new_state): #state 0 = default state; state 1 = alarm state
-    pass
+    global state 
+    if (state != new_state):
+        if (new_state == 1):
+            update_display(4) #alarm state
+        else:
+            update_display(0)
+        state = new_state
+    
+
+def next_layer(): #change layer to next(state has to = 0)
+    global layer 
+    global state 
+    if state == 0:
+        layer = layer + 1
+        if layer > 3:
+            layer = 0
+        update_display(layer)
+
+def turn_off_alarm():
+   change_state(0)
+   led_off()
+   #sound_off

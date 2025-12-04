@@ -27,9 +27,9 @@ class Compositor:
                 self.last_brightness = current_brightness
             # Swap display buffer
             canvas = self.matrix.matrix.SwapOnVSync(canvas)
-
             # Maintain target FPS
             elapsed = time.time() - start
             if elapsed < frame_duration:
                 time.sleep(frame_duration - elapsed)
-
+    def update_layer(self, new_layers):
+        self.layers = new_layers
