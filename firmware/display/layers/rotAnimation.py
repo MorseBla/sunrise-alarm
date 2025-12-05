@@ -25,7 +25,7 @@ class RotatingBlockGenerator(Layer):
         self.max_display = self.cent_x + display_square / 2
 
     def update(self, canvas, dt):
-        rotation = (globals.getRot() + 1) % 360
+        rotation = (globals.getRot() + 5) % 360
         globals.updateRot(rotation)
 
         angle = rotation * self.deg_to_rad

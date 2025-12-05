@@ -30,6 +30,7 @@ class Compositor:
             # Maintain target FPS
             elapsed = time.time() - start
             if elapsed < frame_duration:
+                print("waiting") 
                 time.sleep(frame_duration - elapsed)
     def update_layer(self, new_layers):
         self.layers = new_layers

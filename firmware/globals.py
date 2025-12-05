@@ -12,6 +12,7 @@ from firmware.display.layers.white_screen import WhiteScreen
 from firmware.display.layers.display_image import imageLayer 
 from firmware.display.layers.black_screen import BlackScreen 
 from firmware import led 
+from firmware.audio import sound
 
 SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
 rot = 0
@@ -96,8 +97,10 @@ def start(idx):
     global compositor 
     global state
     #state = 1
-    compositor.update_layer(layers[idx])
-    compositor.run(fps=30)
+    #compositor.update_layer(layers[idx])
+    volume_percent = get_volume()
+    sound.play_sound_loop(0, volume_percent)
+    #compositor.run(fps=30)
 
 def update_leds(percent):
     global white
