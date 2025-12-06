@@ -1,6 +1,8 @@
 import time
 import json
 import os
+import subprocess
+import time
 from firmware.display.matrix import MatrixController
 from firmware.display.layers.animation import RainbowAnimation
 from firmware.display.layers.clock import ClockOverlay
@@ -15,9 +17,75 @@ from firmware import led
 from firmware.audio import sound
 
 SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
-rot = 0
-state = 0
-layer = 0
+BEEP_PATH = "firmware/audio/beep.wav"
+rot = 0 #rotation for rotation animation
+state = 0 #alarm state (0 = default entertainment; 1 = alarm going off)
+layer = 0 #which layer (animation) for default entertainment mode
+
+
+
+# store 'pid' for looped playback
+_loop_process = None
+
+#---------------LED matrix varibles and layers-------------
+matrix = MatrixController(rows=32, cols=32, chain=1)
+layer0 = [
+        ClockOverlay()
+        ]
+layer1 = [
+    RainbowAnimation(matrix.options.cols, matrix.options.rows),
+    RotatingBlockGenerator(),
+    ClockOverlay()
+]
+layer2 = [
+        imageLayer(image_file="firmware/display/animations/image1.png")
+        ]
+layer3 = [
+        BlackScreen()
+        ]
+layer4 = [
+    PNGAnimationLayer(folder="firmware/display/animations/sunrise1", width=32, height=32),
+    ClockOverlay2()
+]
+layers= [layer0, layer1, layer2, layer3, layer4]
+compositor = Compositor(matrix, layers[0])
+
+#-----------------Supplemental LEDs-----------------
+red, green, blue, white = led.init()
+
+#--------------------settings------------------
+def load_settings():
+    """Load the settings JSON safely and return a dict."""
+    time.sleep(0.1)
+    with open(SETTINGS_FILE, "r") as f:
+        data = json.load(f)
+    return data
+
+def get_volume():
+    """Return the volume value from the JSON (default 100 if missing)."""
+    data = load_settings()
+    return data.get("volume", 100)
+
+def get_brightness():
+    """Return the brightness value from the JSON (default 100 if missing)."""
+    data = load_settings()
+    return data.get("brightness", 100)
+
+#----------time-----------------
+def getTime():
+    return time.localtime()
+
+def update_leds(percent):
+    global white
+    white.ChangeDutyCycle(percent)
+
+def led_off():
+    global red, green, blue, white
+    red.ChangeDutyCycle(0)
+    green.ChangeDutyCycle(0)
+    blue.ChangeDutyCycle(0)
+    white.ChangeDutyCycle(0)
+
 def getRot():
     global rot
     return rot
@@ -25,9 +93,58 @@ def updateRot(newValue):
     global rot
     rot = newValue
 
-def getTime():
-    return time.localtime()
+#-----------display/animations--------------
+def update_display(idx):
+    global compositor 
+    compositor.update_layer(layers[idx])
 
+def change_state(new_state): #state 0 = default state; state 1 = alarm state
+    global state 
+    if (state != new_state):
+        if (new_state == 1):
+            update_display(4) #alarm state
+        else:
+            update_display(0)
+        state = new_state
+
+def next_layer(): #change layer to next(state has to = 0)
+    global layer 
+    global state 
+    if state == 0:
+        layer = layer + 1
+        if layer > 3:
+            layer = 0
+        update_display(layer)
+
+#--------------SOUND---------------------
+def _apply_volume():
+    """Set system PCM volume according to 0–100 global value."""
+    vol = max(0, min(100, vol_percent))
+    # Adjust 'PCM' channel volume
+    subprocess.call(["amixer", "set", "PCM", f"{vol}%"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def play_sound_loop(vol):
+    """Loop beep.wav continuously until stop_sound() is called."""
+    global _loop_process
+
+    stop_sound()  # stop previous loops
+    _apply_volume(vol)
+
+    # Loop using bash: while true; do aplay BEEP; done
+    _loop_process = subprocess.Popen(
+        ["bash", "-c", f"while true; do aplay -q {BEEP_PATH}; done"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+def stop_sound():
+    """Stops the looped sound if it's running."""
+    global _loop_process
+    if _loop_process is not None:
+        _loop_process.terminate()
+        _loop_process = None
+
+#--------------alarm----------------------
 def load_alarms(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/alarms.json"):
     time.sleep(0.01)
     # Expand ~ manually (Python won't expand it inside a string)
@@ -51,48 +168,13 @@ def checkAlarm(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/ala
         print("ALARM")
         update_display(1)
 
-def load_settings():
-    """Load the settings JSON safely and return a dict."""
-    time.sleep(0.1)
-    with open(SETTINGS_FILE, "r") as f:
-        data = json.load(f)
-    return data
+#--------------ALARM----------------
+def turn_off_alarm():
+   change_state(0)
+   led_off()
+   #sound_off
 
-def get_volume():
-    """Return the volume value from the JSON (default 100 if missing)."""
-    data = load_settings()
-    return data.get("volume", 100)
-
-def get_brightness():
-    """Return the brightness value from the JSON (default 100 if missing)."""
-    data = load_settings()
-    return data.get("brightness", 100)
-
-
-
-
-matrix = MatrixController(rows=32, cols=32, chain=1)
-layer0 = [
-        ClockOverlay()
-        ]
-layer1 = [
-    RainbowAnimation(matrix.options.cols, matrix.options.rows),
-    RotatingBlockGenerator(),
-    ClockOverlay()
-]
-layer2 = [
-        imageLayer(image_file="firmware/display/animations/image1.png")
-        ]
-layer3 = [
-        BlackScreen()
-        ]
-layer4 = [
-    PNGAnimationLayer(folder="firmware/display/animations/sunrise1", width=32, height=32),
-    ClockOverlay2()
-]
-layers= [layer0, layer1, layer2, layer3, layer4]
-compositor = Compositor(matrix, layers[0])
-red, green, blue, white = led.init()
+#-----------start------------------
 def start(idx):
     global compositor 
     global state
@@ -102,42 +184,3 @@ def start(idx):
     sound.play_sound_loop(0, volume_percent)
     #compositor.run(fps=30)
 
-def update_leds(percent):
-    global white
-    white.ChangeDutyCycle(percent)
-
-def led_off():
-    global red, green, blue, white
-    red.ChangeDutyCycle(0)
-    green.ChangeDutyCycle(0)
-    blue.ChangeDutyCycle(0)
-    white.ChangeDutyCycle(0)
-
-     
-def update_display(idx):
-    global compositor 
-    compositor.update_layer(layers[idx])
-
-def change_state(new_state): #state 0 = default state; state 1 = alarm state
-    global state 
-    if (state != new_state):
-        if (new_state == 1):
-            update_display(4) #alarm state
-        else:
-            update_display(0)
-        state = new_state
-    
-
-def next_layer(): #change layer to next(state has to = 0)
-    global layer 
-    global state 
-    if state == 0:
-        layer = layer + 1
-        if layer > 3:
-            layer = 0
-        update_display(layer)
-
-def turn_off_alarm():
-   change_state(0)
-   led_off()
-   #sound_off
