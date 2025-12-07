@@ -2,7 +2,6 @@
 
 import pygame
 import os
-from firmware.globals import get_volume
 
 # Path to the single audio file
 BEEP_PATH = "firmware/audio/beep.wav"
@@ -34,9 +33,8 @@ BEEP_SOUND = pygame.mixer.Sound(BEEP_PATH)
 #  VOLUME HANDLING
 # -----------------------------
 
-def _apply_volume(sound):
+def _apply_volume(vol_percent, sound):
     """Apply volume from settings.json (0–100 → 0.0–1.0)."""
-    vol_percent = get_volume()
     vol = max(0.0, min(1.0, vol_percent / 100.0))
     sound.set_volume(vol)
 
@@ -45,15 +43,15 @@ def _apply_volume(sound):
 #  PUBLIC FUNCTIONS
 # -----------------------------
 
-def play_sound_once():
+def play_sound_once(vol):
     """Play the beep sound once (non-blocking)."""
-    _apply_volume(BEEP_SOUND)
+    _apply_volume(vol, BEEP_SOUND)
     ONCE_CHANNEL.play(BEEP_SOUND, loops=0)
 
 
-def play_sound_loop():
+def play_sound_loop(vol):
     """Loop the beep sound forever until stop_sound() is called."""
-    _apply_volume(BEEP_SOUND)
+    _apply_volume(vol ,BEEP_SOUND)
     LOOP_CHANNEL.stop()  # clear previous playback
     LOOP_CHANNEL.play(BEEP_SOUND, loops=-1)
 
@@ -61,3 +59,5 @@ def play_sound_loop():
 def stop_sound():
     """Stop the looping beep sound."""
     LOOP_CHANNEL.stop()
+
+play_sound_once(50)

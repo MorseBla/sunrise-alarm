@@ -49,6 +49,7 @@ class PNGAnimationLayer(Layer):
                 globals.update_leds(30)
             elif (self.current_frame == 7):
                 globals.update_leds(60)
+                globals.play_sound()
         frame = self.frames[self.current_frame]
         canvas.SetImage(frame)
 

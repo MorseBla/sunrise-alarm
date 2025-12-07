@@ -10,6 +10,8 @@ class MatrixController:
         self.options.hardware_mapping = mapping
         self.options.brightness = brightness
         self.options.drop_privileges = False  # stay as root if needed
+        self.options.disable_hardware_pulsing = False
+        self.options.gpio_slowdown = 4 
 
         self.matrix = RGBMatrix(options=self.options)
         self.canvas = self.matrix.CreateFrameCanvas()
@@ -23,5 +25,8 @@ class MatrixController:
 
     def show(self):
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
-
+    def stop_everything(self):
+            self.matrix.Clear()
+            del self.matrix 
+            self.matrix = None
 

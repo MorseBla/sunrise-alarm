@@ -3,6 +3,8 @@ import os
 import json
 import subprocess
 import time
+import socket
+import multiprocessing 
 from firmware.display.matrix import MatrixController
 from firmware.display.layers.animation import RainbowAnimation
 from firmware.display.layers.clock import ClockOverlay
@@ -16,7 +18,8 @@ from firmware.display.layers.black_screen import BlackScreen
 from firmware import led 
 from firmware import settings
 
-BEEP_PATH = "firmware/audio/beep.wav"
+BEEP_PATH = "firmware/beep.wav"
+print(os.path.exists(BEEP_PATH))
 rot = 0 #rotation for rotation animation
 state = 0 #alarm state (0 = default entertainment; 1 = alarm going off)
 layer = 0 #which layer (animation) for default entertainment mode
@@ -139,17 +142,17 @@ def load_alarms(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/al
     # Return only enabled alarms
     return [a["time"] for a in data if a.get("enabled", True)]
 
-def checkAlarm(filename="/home/admin/Desktop/real/sunrise-alarm/website/data/alarms.json"):
+def checkAlarm(filename="/home/admin/Desktop/real2/sunrise-alarm/website/data/alarms.json"):
     print("checking alarm")
 
     now = time.localtime()
     current_time = f"{now.tm_hour:02d}:{now.tm_min:02d}"
 
     alarms = load_alarms(filename)
-
+    print(alarms)
     if current_time in alarms:
         print("ALARM")
-        update_display(1)
+        update_display(4)
 
 #--------------ALARM----------------
 def turn_off_alarm():
@@ -157,13 +160,31 @@ def turn_off_alarm():
    led_off()
    #sound_off
 
+
+#-------------------sound comms----------
+SOCKET_PATH = "/tmp/sunrise_audio.sock"
+def send_audio_command(cmd: str):
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(SOCKET_PATH)
+        sock.send(cmd.encode())
+        sock.close()
+
+    except Exception as e:
+        print(e)
+
+def play_sound():
+    send_audio_command("PLAY_SOUND")
+   
+def stop_sound():
+    send_audio_command("STOP_SOUND")
+
 #-----------start------------------
 def start(idx):
     global compositor 
     global state
     #state = 1
-    #compositor.update_layer(layers[idx])
-    volume_percent = settings.get_volume()
-    play_sound_loop(volume_percent)
-    #compositor.run(fps=30)
+    compositor.update_layer(layers[idx])
+    #play_sound() 
+    compositor.run(fps=30)
 
