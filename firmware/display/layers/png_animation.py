@@ -33,7 +33,6 @@ class PNGAnimationLayer(Layer):
             img = img.resize((self.width, self.height), Image.LANCZOS)
             self.frames.append(img)
 
-        print(f"[INFO] Loaded {len(self.frames)} frames from {self.folder}")
 
     def update(self, canvas, dt):
         """Draw the current frame and advance based on FPS."""

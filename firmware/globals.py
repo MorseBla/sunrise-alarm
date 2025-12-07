@@ -1,6 +1,6 @@
 import time
-import json
 import os
+import json
 import subprocess
 import time
 from firmware.display.matrix import MatrixController
@@ -14,9 +14,8 @@ from firmware.display.layers.white_screen import WhiteScreen
 from firmware.display.layers.display_image import imageLayer 
 from firmware.display.layers.black_screen import BlackScreen 
 from firmware import led 
-from firmware.audio import sound
+from firmware import settings
 
-SETTINGS_FILE = "/home/admin/Desktop/real/sunrise-alarm/website/data/settings.json"
 BEEP_PATH = "firmware/audio/beep.wav"
 rot = 0 #rotation for rotation animation
 state = 0 #alarm state (0 = default entertainment; 1 = alarm going off)
@@ -53,23 +52,6 @@ compositor = Compositor(matrix, layers[0])
 #-----------------Supplemental LEDs-----------------
 red, green, blue, white = led.init()
 
-#--------------------settings------------------
-def load_settings():
-    """Load the settings JSON safely and return a dict."""
-    time.sleep(0.1)
-    with open(SETTINGS_FILE, "r") as f:
-        data = json.load(f)
-    return data
-
-def get_volume():
-    """Return the volume value from the JSON (default 100 if missing)."""
-    data = load_settings()
-    return data.get("volume", 100)
-
-def get_brightness():
-    """Return the brightness value from the JSON (default 100 if missing)."""
-    data = load_settings()
-    return data.get("brightness", 100)
 
 #----------time-----------------
 def getTime():
@@ -117,7 +99,7 @@ def next_layer(): #change layer to next(state has to = 0)
         update_display(layer)
 
 #--------------SOUND---------------------
-def _apply_volume():
+def _apply_volume(vol_percent):
     """Set system PCM volume according to 0–100 global value."""
     vol = max(0, min(100, vol_percent))
     # Adjust 'PCM' channel volume
@@ -136,6 +118,7 @@ def play_sound_loop(vol):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+    print(_loop_process)
 
 def stop_sound():
     """Stops the looped sound if it's running."""
@@ -180,7 +163,7 @@ def start(idx):
     global state
     #state = 1
     #compositor.update_layer(layers[idx])
-    volume_percent = get_volume()
-    sound.play_sound_loop(0, volume_percent)
+    volume_percent = settings.get_volume()
+    play_sound_loop(volume_percent)
     #compositor.run(fps=30)
 
